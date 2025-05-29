@@ -9,8 +9,8 @@ export interface Report {
   texts: Text[];
   pictures: Picture[];
   tables: Table[];
-  key_value_items: any[];
-  form_items: any[];
+  key_value_items: unknown[];
+  form_items: unknown[];
   pages: Pages;
 }
 
@@ -67,24 +67,24 @@ export interface Picture {
   content_layer: ContentLayer;
   label: string;
   prov: Prov[];
-  captions: any[];
-  references: any[];
-  footnotes: any[];
+  captions: unknown[];
+  references: unknown[];
+  footnotes: unknown[];
   image?: Image;
-  annotations?: any[];
+  annotations?: unknown[];
   data?: Data;
 }
 
 export interface Table {
-  captions: any[];
-  children: any[];
+  captions: unknown[];
+  children: unknown[];
   content_layer: string;
   data: Data;
-  footnotes: any[];
+  footnotes: unknown[];
   label: string;
   parent: Parent;
   prov: Prov[];
-  references: any[];
+  references: unknown[];
   self_ref: string;
 }
 
@@ -131,7 +131,7 @@ export interface Prov {
 export interface Text {
   self_ref: string;
   parent: Parent;
-  children: any[];
+  children: unknown[];
   content_layer: ContentLayer;
   label: Label;
   prov: Prov[];
