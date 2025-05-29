@@ -1,7 +1,7 @@
 import { Page, Document, pdfjs } from "react-pdf";
 import OverlayBox from "./OverlayBox";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { Report } from "../@types/pdfJson";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -38,12 +38,17 @@ const PdfViewer = ({
     }
   }, [clickedId]);
 
-  const textMap = Object.fromEntries(data.texts.map((t) => [t.self_ref, t]));
-  const tableMap = Object.fromEntries(data.tables.map((t) => [t.self_ref, t]));
-  const picturesMap = Object.fromEntries(
-    data.pictures.map((t) => [t.self_ref, t])
+  const maps = useMemo(
+    () => ({
+      textMap: Object.fromEntries(data.texts.map((t) => [t.self_ref, t])),
+      tableMap: Object.fromEntries(data.tables.map((t) => [t.self_ref, t])),
+      picturesMap: Object.fromEntries(
+        data.pictures.map((t) => [t.self_ref, t])
+      ),
+      groupsMap: Object.fromEntries(data.groups.map((t) => [t.self_ref, t])),
+    }),
+    [data]
   );
-  const groupsMap = Object.fromEntries(data.groups.map((t) => [t.self_ref, t]));
 
   return (
     <Document
@@ -63,12 +68,14 @@ const PdfViewer = ({
             const id = ref.$ref;
             let item;
             if (id.startsWith("#/groups/")) {
-              const first = groupsMap[id].children[0];
+              const first = maps.groupsMap[id].children[0];
               const last =
-                groupsMap[id].children[groupsMap[id].children.length - 1];
+                maps.groupsMap[id].children[
+                  maps.groupsMap[id].children.length - 1
+                ];
               const maxWidth = Math.max(
-                ...groupsMap[id].children.map(
-                  (c) => textMap[c.$ref].prov[0].bbox.r
+                ...maps.groupsMap[id].children.map(
+                  (c) => maps.textMap[c.$ref].prov[0].bbox.r
                 )
               );
               return (
@@ -78,10 +85,10 @@ const PdfViewer = ({
                   }}
                   key={idx}
                   bbox={{
-                    l: textMap[first.$ref].prov[0].bbox.l,
+                    l: maps.textMap[first.$ref].prov[0].bbox.l,
                     r: maxWidth,
-                    t: textMap[first.$ref].prov[0].bbox.t,
-                    b: textMap[last.$ref].prov[0].bbox.b,
+                    t: maps.textMap[first.$ref].prov[0].bbox.t,
+                    b: maps.textMap[last.$ref].prov[0].bbox.b,
                   }}
                   pageWidth={600}
                   hovered={hoveredId === first.$ref}
@@ -92,11 +99,11 @@ const PdfViewer = ({
                 />
               );
             } else if (id.startsWith("#/tables/")) {
-              item = tableMap[id];
+              item = maps.tableMap[id];
             } else if (id.startsWith("#/pictures/")) {
-              item = picturesMap[id];
+              item = maps.picturesMap[id];
             } else {
-              item = textMap[id];
+              item = maps.textMap[id];
             }
             return (
               <OverlayBox
