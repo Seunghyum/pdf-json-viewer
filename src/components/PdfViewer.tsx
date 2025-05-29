@@ -15,6 +15,7 @@ interface PdfViewerProps {
   clickedId: string | null;
   onHover: (id: string | null) => void;
   onClick: (id: string) => void;
+  pdfUrl: string;
 }
 
 const PdfViewer = ({
@@ -23,10 +24,10 @@ const PdfViewer = ({
   clickedId,
   onHover,
   onClick,
+  pdfUrl,
 }: PdfViewerProps) => {
   const [numPages, setNumPages] = useState<number>(0);
   const pdfRef = useRef<Record<string, HTMLDivElement | null>>({});
-  const pdfUrl = "./1.report.pdf";
 
   useEffect(() => {
     if (clickedId && pdfRef.current[clickedId]) {

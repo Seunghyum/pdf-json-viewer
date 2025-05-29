@@ -13,6 +13,7 @@ function App() {
     <div className="flex h-screen">
       <div className="w-1/2 overflow-auto border-r">
         <PdfViewer
+          pdfUrl="./1.report.pdf"
           data={data as Report}
           hoveredId={hoveredId}
           clickedId={clickedId}
