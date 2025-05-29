@@ -1,7 +1,7 @@
 import type { Bbox } from "../@types/pdfJson";
 
 interface OverlayBoxProps {
-  bbox: Bbox;
+  bbox: Omit<Bbox, "coord_origin">;
   pageWidth: number;
   hovered: boolean;
   clicked: boolean;
@@ -24,7 +24,7 @@ const OverlayBox = ({
   const scale = pageWidth / 595; // PDF 기본 폭
   const style = {
     left: bbox.l * scale,
-    top: (842 - bbox.t) * scale, // PDF origin is bottom-left
+    top: (842 - bbox.t) * scale,
     width: (bbox.r - bbox.l) * scale,
     height: (bbox.t - bbox.b) * scale,
   };

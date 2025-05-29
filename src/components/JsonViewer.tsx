@@ -1,6 +1,5 @@
-// src/components/JsonViewer.tsx
-import { useEffect, useRef } from "react";
-import type { Report } from "../@types/pdfJson";
+import { useEffect, useRef, type JSX } from "react";
+import type { Report, Table } from "../@types/pdfJson";
 
 interface JsonViewerProps {
   data: Report;
@@ -30,98 +29,38 @@ const JsonViewer = ({
 
   const textMap = Object.fromEntries(data.texts.map((t) => [t.self_ref, t]));
   const tableMap = Object.fromEntries(data.tables.map((t) => [t.self_ref, t]));
-  console.log("tableMap : ", tableMap);
 
-  const renderItem = (item: any) => {
-    if (item.text) {
-      return (
-        <div
-          key={item.self_ref}
-          ref={(el) => {
-            jsonRefs.current[item.self_ref] = el;
-          }}
-          onMouseEnter={() => onHover(item.self_ref)}
-          onMouseLeave={() => onHover(null)}
-          onClick={() => onClick(item.self_ref)}
-          className={`p-2 border rounded cursor-pointer whitespace-pre-wrap ${
-            clickedId === item.self_ref
-              ? "bg-yellow-200"
-              : hoveredId === item.self_ref
-              ? "bg-yellow-100"
-              : ""
-          }`}
-        >
-          {item.text}
-        </div>
-      );
-    } else if (item.data?.grid) {
-      return (
-        <div
-          key={item.self_ref}
-          ref={(el) => {
-            jsonRefs.current[item.self_ref] = el;
-          }}
-          onMouseEnter={() => onHover(item.self_ref)}
-          onMouseLeave={() => onHover(null)}
-          onClick={() => onClick(item.self_ref)}
-          className={`border p-2 rounded overflow-auto ${
-            clickedId === item.self_ref
-              ? "bg-yellow-200"
-              : hoveredId === item.self_ref
-              ? "bg-yellow-100"
-              : ""
-          }`}
-        >
-          <table className="table-fixed border-collapse border w-full text-sm">
-            <tbody>
-              {item.data.grid.map((row: any[], rowIdx: number) => (
-                <tr key={rowIdx}>
-                  {row.map((cell, colIdx) =>
-                    cell.column_header || cell.row_header ? (
-                      <th
-                        key={colIdx}
-                        colSpan={cell.col_span}
-                        rowSpan={cell.row_span}
-                        className="border px-2 py-1"
-                      >
-                        {cell.text}
-                      </th>
-                    ) : (
-                      <td
-                        key={colIdx}
-                        colSpan={cell.col_span}
-                        rowSpan={cell.row_span}
-                        className="border px-2 py-1"
-                      >
-                        {cell.text}
-                      </td>
-                    )
-                  )}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      );
-    }
-    return null;
-  };
-
-  const renderGroup = (group: any) => {
+  const renderTable = (item: Table) => {
     return (
-      <div key={group.self_ref}>
-        {group.children.map((ref: any) => {
-          const id = ref.$ref;
-          console.log("ref.$ref : ", ref.$ref.split("/")[1]);
-          // let item;
-          // if (ref.$ref.split("/")[1] === "texts") {
-          //   item = textMap[id];
-          // } else if (ref.$ref.split("/")[1] === "tables") item = tableMap[id];
-          // const item = textMap[id] || tableMap[id];
-          const item = textMap[id];
-          return item ? renderItem(item) : null;
-        })}
-      </div>
+      <table className="table-fixed border-collapse border w-full text-sm">
+        <tbody>
+          {item.data.grid.map((row, rowIdx: number) => (
+            <tr key={rowIdx}>
+              {row.map((cell, colIdx) =>
+                cell.column_header || cell.row_header ? (
+                  <th
+                    key={colIdx}
+                    colSpan={cell.col_span}
+                    rowSpan={cell.row_span}
+                    className="border px-2 py-1"
+                  >
+                    {cell.text}
+                  </th>
+                ) : (
+                  <td
+                    key={colIdx}
+                    colSpan={cell.col_span}
+                    rowSpan={cell.row_span}
+                    className="border px-2 py-1"
+                  >
+                    {cell.text}
+                  </td>
+                )
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     );
   };
 
@@ -129,21 +68,46 @@ const JsonViewer = ({
     <div className="space-y-8">
       {data.body.children.map((ref) => {
         const id = ref.$ref;
+        let item;
+        let renderTarget: JSX.Element | string;
         if (id.startsWith("#/groups/")) {
           const idx = parseInt(id.replace("#/groups/", ""), 10);
-          const group = data.groups[idx];
-          return group ? renderGroup(group) : null;
+          renderTarget = data.groups[idx].children
+            .map((c) => textMap[c.$ref].text)
+            .join("\n");
+          item = textMap[data.groups[idx].children[0].$ref];
         } else if (id.startsWith("#/pictures/")) {
           const idx = parseInt(id.replace("#/pictures/", ""), 10);
-          const picture = data.pictures[idx];
-          return picture ? renderGroup(picture) : null;
+          item = data.pictures[idx];
+          renderTarget = <img src={item.image?.uri} />;
         } else if (id.startsWith("#/tables/")) {
-          const item = tableMap[id];
-          return item ? renderItem(item) : null;
+          item = tableMap[id];
+          renderTarget = renderTable(item);
         } else {
-          const item = tableMap[id];
-          return item ? renderItem(item) : null;
+          item = textMap[id];
+          renderTarget = item.text;
         }
+
+        return (
+          <div
+            key={item.self_ref}
+            ref={(el) => {
+              jsonRefs.current[item.self_ref] = el;
+            }}
+            onMouseEnter={() => onHover(item.self_ref)}
+            onMouseLeave={() => onHover(null)}
+            onClick={() => onClick(item.self_ref)}
+            className={`border p-2 rounded overflow-auto ${
+              clickedId === item.self_ref
+                ? "bg-yellow-200"
+                : hoveredId === item.self_ref
+                ? "bg-yellow-100"
+                : ""
+            }`}
+          >
+            {renderTarget}
+          </div>
+        );
       })}
     </div>
   );

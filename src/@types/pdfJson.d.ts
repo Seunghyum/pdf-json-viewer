@@ -8,7 +8,7 @@ export interface Report {
   groups: Body[];
   texts: Text[];
   pictures: Picture[];
-  tables: Picture[];
+  tables: Table[];
   key_value_items: any[];
   form_items: any[];
   pages: Pages;
@@ -73,6 +73,19 @@ export interface Picture {
   image?: Image;
   annotations?: any[];
   data?: Data;
+}
+
+export interface Table {
+  captions: any[];
+  children: any[];
+  content_layer: string;
+  data: Data;
+  footnotes: any[];
+  label: string;
+  parent: Parent;
+  prov: Prov[];
+  references: any[];
+  self_ref: string;
 }
 
 export interface Data {
