@@ -1,0 +1,47 @@
+import type { Bbox } from "../@types/pdfJson";
+
+interface OverlayBoxProps {
+  bbox: Bbox;
+  pageWidth: number;
+  hovered: boolean;
+  clicked: boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  onClick: () => void;
+}
+
+const OverlayBox = ({
+  bbox,
+  pageWidth,
+  hovered,
+  clicked,
+  onMouseEnter,
+  onMouseLeave,
+  onClick,
+}: OverlayBoxProps) => {
+  const scale = pageWidth / 595; // PDF 기본 폭
+  const style = {
+    left: bbox.l * scale,
+    top: (842 - bbox.t) * scale, // PDF origin is bottom-left
+    width: (bbox.r - bbox.l) * scale,
+    height: (bbox.t - bbox.b) * scale,
+  };
+
+  return (
+    <div
+      className={`absolute border ${
+        clicked
+          ? "border-yellow-500 bg-yellow-200/50"
+          : hovered
+          ? "border-blue-400 bg-blue-200/30"
+          : "border-transparent"
+      }`}
+      style={style}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onClick={onClick}
+    />
+  );
+};
+
+export default OverlayBox;
