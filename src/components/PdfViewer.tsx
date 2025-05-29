@@ -58,7 +58,7 @@ const PdfViewer = ({
             width={600}
           />
 
-          {data.body.children.map((ref) => {
+          {data.body.children.map((ref, idx) => {
             const id = ref.$ref;
             let item;
             if (id.startsWith("#/groups/")) {
@@ -75,7 +75,7 @@ const PdfViewer = ({
                   ref={(el) => {
                     pdfRef.current[first.$ref] = el;
                   }}
-                  key={index}
+                  key={idx}
                   bbox={{
                     l: textMap[first.$ref].prov[0].bbox.l,
                     r: maxWidth,
@@ -102,7 +102,7 @@ const PdfViewer = ({
                 ref={(el) => {
                   pdfRef.current[item.self_ref] = el;
                 }}
-                key={item.self_ref}
+                key={idx}
                 bbox={item.prov?.[0]?.bbox}
                 pageWidth={600}
                 hovered={hoveredId === item.self_ref}
