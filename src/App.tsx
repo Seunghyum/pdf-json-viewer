@@ -5,8 +5,6 @@ import data from "../public/1.report.json";
 import "./styles.css";
 import type { Report } from "./@types/pdfJson";
 
-import "react-pdf/dist/esm/Page/TextLayer.css";
-
 function App() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [clickedId, setClickedId] = useState<string | null>(null);

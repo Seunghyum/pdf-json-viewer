@@ -36,7 +36,12 @@ const PdfViewer = ({
     >
       {Array.from(new Array(numPages), (_, index) => (
         <div key={`page_${index + 1}`} className="relative">
-          <Page pageNumber={index + 1} width={600} />
+          <Page
+            renderAnnotationLayer={false}
+            renderTextLayer={false}
+            pageNumber={index + 1}
+            width={600}
+          />
           {highlights
             .filter((item) => item.prov[0].page_no === index + 1)
             .map((item, idx: number) => (
