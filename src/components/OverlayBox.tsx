@@ -8,6 +8,7 @@ interface OverlayBoxProps {
   onMouseEnter: () => void;
   onMouseLeave: () => void;
   onClick: () => void;
+  ref?: React.Ref<HTMLDivElement>;
 }
 
 const OverlayBox = ({
@@ -18,6 +19,7 @@ const OverlayBox = ({
   onMouseEnter,
   onMouseLeave,
   onClick,
+  ref,
 }: OverlayBoxProps) => {
   const scale = pageWidth / 595; // PDF 기본 폭
   const style = {
@@ -29,6 +31,7 @@ const OverlayBox = ({
 
   return (
     <div
+      ref={ref}
       className={`absolute border ${
         clicked
           ? "border-yellow-500 bg-yellow-200/50"

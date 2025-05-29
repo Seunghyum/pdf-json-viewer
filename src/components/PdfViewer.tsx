@@ -1,7 +1,7 @@
 import { Page, Document, pdfjs } from "react-pdf";
 import OverlayBox from "./OverlayBox";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Report } from "../@types/pdfJson";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -25,9 +25,19 @@ const PdfViewer = ({
   onClick,
 }: PdfViewerProps) => {
   const [numPages, setNumPages] = useState<number>(0);
+  const jsonRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const pdfUrl = "./1.report.pdf";
 
   const highlights = data.texts;
+
+  useEffect(() => {
+    if (clickedId && jsonRefs.current[clickedId]) {
+      jsonRefs.current[clickedId]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [clickedId]);
 
   return (
     <Document
@@ -46,6 +56,9 @@ const PdfViewer = ({
             .filter((item) => item.prov[0].page_no === index + 1)
             .map((item, idx: number) => (
               <OverlayBox
+                ref={(el) => {
+                  jsonRefs.current[item.self_ref] = el;
+                }}
                 key={idx}
                 bbox={item.prov[0].bbox}
                 pageWidth={600}
