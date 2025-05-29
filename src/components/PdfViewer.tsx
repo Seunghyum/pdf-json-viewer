@@ -25,14 +25,14 @@ const PdfViewer = ({
   onClick,
 }: PdfViewerProps) => {
   const [numPages, setNumPages] = useState<number>(0);
-  const jsonRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const pdfRef = useRef<Record<string, HTMLDivElement | null>>({});
   const pdfUrl = "./1.report.pdf";
 
   const highlights = data.texts;
 
   useEffect(() => {
-    if (clickedId && jsonRefs.current[clickedId]) {
-      jsonRefs.current[clickedId]?.scrollIntoView({
+    if (clickedId && pdfRef.current[clickedId]) {
+      pdfRef.current[clickedId]?.scrollIntoView({
         behavior: "smooth",
         block: "center",
       });
@@ -57,7 +57,7 @@ const PdfViewer = ({
             .map((item, idx: number) => (
               <OverlayBox
                 ref={(el) => {
-                  jsonRefs.current[item.self_ref] = el;
+                  pdfRef.current[item.self_ref] = el;
                 }}
                 key={idx}
                 bbox={item.prov[0].bbox}

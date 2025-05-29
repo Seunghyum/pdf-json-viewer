@@ -1,4 +1,5 @@
 // src/components/JsonViewer.tsx
+import { useEffect, useRef } from "react";
 import type { Report } from "../@types/pdfJson";
 
 interface JsonViewerProps {
@@ -16,6 +17,17 @@ const JsonViewer = ({
   onHover,
   onClick,
 }: JsonViewerProps) => {
+  const jsonRefs = useRef<Record<string, HTMLDivElement | null>>({});
+
+  useEffect(() => {
+    if (clickedId && jsonRefs.current[clickedId]) {
+      jsonRefs.current[clickedId]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [clickedId, jsonRefs]);
+
   const textMap = Object.fromEntries(data.texts.map((t) => [t.self_ref, t]));
   const tableMap = Object.fromEntries(data.tables.map((t) => [t.self_ref, t]));
   console.log("tableMap : ", tableMap);
@@ -25,6 +37,9 @@ const JsonViewer = ({
       return (
         <div
           key={item.self_ref}
+          ref={(el) => {
+            jsonRefs.current[item.self_ref] = el;
+          }}
           onMouseEnter={() => onHover(item.self_ref)}
           onMouseLeave={() => onHover(null)}
           onClick={() => onClick(item.self_ref)}
@@ -43,6 +58,9 @@ const JsonViewer = ({
       return (
         <div
           key={item.self_ref}
+          ref={(el) => {
+            jsonRefs.current[item.self_ref] = el;
+          }}
           onMouseEnter={() => onHover(item.self_ref)}
           onMouseLeave={() => onHover(null)}
           onClick={() => onClick(item.self_ref)}

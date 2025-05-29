@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import PdfViewer from "./components/PdfViewer";
 import JsonViewer from "./components/JsonViewer";
 import data from "../public/1.report.json";
@@ -8,8 +8,6 @@ import type { Report } from "./@types/pdfJson";
 function App() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [clickedId, setClickedId] = useState<string | null>(null);
-
-  const jsonRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   return (
     <div className="flex h-screen">
@@ -29,7 +27,6 @@ function App() {
           clickedId={clickedId}
           onHover={setHoveredId}
           onClick={setClickedId}
-          jsonRefs={jsonRefs}
         />
       </div>
     </div>
