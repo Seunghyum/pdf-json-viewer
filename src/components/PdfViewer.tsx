@@ -1,8 +1,9 @@
 import { Page, Document, pdfjs } from "react-pdf";
 import OverlayBox from "./OverlayBox";
 import "react-pdf/dist/esm/Page/AnnotationLayer.css";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import type { Report } from "../@types/pdfJson";
+import useScrollTo from "../hooks/useScrollTo";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.min.mjs",
@@ -27,16 +28,7 @@ const PdfViewer = ({
   pdfUrl,
 }: PdfViewerProps) => {
   const [numPages, setNumPages] = useState<number>(0);
-  const pdfRef = useRef<Record<string, HTMLDivElement | null>>({});
-
-  useEffect(() => {
-    if (clickedId && pdfRef.current[clickedId]) {
-      pdfRef.current[clickedId]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [clickedId]);
+  const pdfRef = useScrollTo(clickedId);
 
   const maps = useMemo(
     () => ({

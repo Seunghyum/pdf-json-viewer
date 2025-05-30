@@ -1,5 +1,6 @@
-import { useEffect, useRef, type JSX } from "react";
+import { type JSX } from "react";
 import type { Report, Table } from "../@types/pdfJson";
+import useScrollTo from "../hooks/useScrollTo";
 
 interface JsonViewerProps {
   data: Report;
@@ -16,50 +17,76 @@ const JsonViewer = ({
   onHover,
   onClick,
 }: JsonViewerProps) => {
-  const jsonRefs = useRef<Record<string, HTMLDivElement | null>>({});
-
-  useEffect(() => {
-    if (clickedId && jsonRefs.current[clickedId]) {
-      jsonRefs.current[clickedId]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }
-  }, [clickedId, jsonRefs]);
+  const jsonRefs = useScrollTo(clickedId);
 
   const textMap = Object.fromEntries(data.texts.map((t) => [t.self_ref, t]));
   const tableMap = Object.fromEntries(data.tables.map((t) => [t.self_ref, t]));
 
   const renderTable = (item: Table) => {
+    const occupied = new Set(); // 실제 렌더링 위치 추적
+    const renderedKeys = new Set(); // 중복 셀 제거용 키: `${start_row_offset_idx},${start_col_offset_idx}`
+
+    const generateTable = () => {
+      return item.data.grid.map((row, rowIdx) => {
+        const tr = [];
+        let colIdx = 0;
+
+        for (const cell of row) {
+          const cellKey = `${cell.start_row_offset_idx},${cell.start_col_offset_idx}`;
+
+          // 중복 셀 제거: 이미 렌더링된 위치면 건너뜀
+          if (renderedKeys.has(cellKey)) {
+            continue;
+          }
+          renderedKeys.add(cellKey);
+
+          // 렌더링 좌표 탐색: occupied 여부 확인
+          while (occupied.has(`${rowIdx},${colIdx}`)) {
+            colIdx++;
+          }
+
+          const rowSpan = cell.row_span || 1;
+          const colSpan = cell.col_span || 1;
+
+          // 병합 셀 영역 마킹
+          for (let r = 0; r < rowSpan; r++) {
+            for (let c = 0; c < colSpan; c++) {
+              occupied.add(`${rowIdx + r},${colIdx + c}`);
+            }
+          }
+
+          tr.push(
+            cell.column_header || cell.row_header ? (
+              <th
+                className="border px-2 py-1"
+                key={`${rowIdx}-${colIdx}`}
+                rowSpan={rowSpan}
+                colSpan={colSpan}
+              >
+                {cell.text}
+              </th>
+            ) : (
+              <td
+                className="border px-2 py-1"
+                key={`${rowIdx}-${colIdx}`}
+                rowSpan={rowSpan}
+                colSpan={colSpan}
+              >
+                {cell.text}
+              </td>
+            )
+          );
+
+          colIdx += colSpan;
+        }
+
+        return <tr key={rowIdx}>{tr}</tr>;
+      });
+    };
+
     return (
       <table className="table-fixed border-collapse border w-full text-sm">
-        <tbody>
-          {item.data.grid.map((row, rowIdx: number) => (
-            <tr key={rowIdx}>
-              {row.map((cell, colIdx) =>
-                cell.column_header || cell.row_header ? (
-                  <th
-                    key={colIdx}
-                    colSpan={cell.col_span}
-                    rowSpan={cell.row_span}
-                    className="border px-2 py-1"
-                  >
-                    {cell.text}
-                  </th>
-                ) : (
-                  <td
-                    key={colIdx}
-                    colSpan={cell.col_span}
-                    rowSpan={cell.row_span}
-                    className="border px-2 py-1"
-                  >
-                    {cell.text}
-                  </td>
-                )
-              )}
-            </tr>
-          ))}
-        </tbody>
+        <tbody>{generateTable()}</tbody>
       </table>
     );
   };
