@@ -3,11 +3,11 @@ import type { Bbox } from "../@types/pdfJson";
 interface OverlayBoxProps {
   bbox: Omit<Bbox, "coord_origin">;
   pageWidth: number;
-  hovered: boolean;
+  hovered?: boolean;
   clicked: boolean;
-  onMouseEnter: () => void;
-  onMouseLeave: () => void;
-  onClick: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+  onClick?: () => void;
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -18,7 +18,6 @@ const OverlayBox = ({
   clicked,
   onMouseEnter,
   onMouseLeave,
-  onClick,
   ref,
 }: OverlayBoxProps) => {
   const scale = pageWidth / 595; // PDF 기본 폭
@@ -42,7 +41,6 @@ const OverlayBox = ({
       style={style}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
-      onClick={onClick}
     />
   );
 };

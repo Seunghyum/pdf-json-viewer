@@ -26,7 +26,6 @@ function App() {
           data={data as Report}
           hoveredId={hoveredId}
           clickedId={clickedId}
-          onHover={setHoveredId}
           onClick={setClickedId}
         />
       </div>

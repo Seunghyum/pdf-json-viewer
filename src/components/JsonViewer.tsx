@@ -6,7 +6,6 @@ interface JsonViewerProps {
   data: Report;
   hoveredId: string | null;
   clickedId: string | null;
-  onHover: (id: string | null) => void;
   onClick: (id: string) => void;
 }
 
@@ -14,10 +13,9 @@ const JsonViewer = ({
   data,
   hoveredId,
   clickedId,
-  onHover,
   onClick,
 }: JsonViewerProps) => {
-  const jsonRefs = useScrollTo(clickedId);
+  const jsonRefs = useScrollTo(hoveredId);
 
   const textMap = Object.fromEntries(data.texts.map((t) => [t.self_ref, t]));
   const tableMap = Object.fromEntries(data.tables.map((t) => [t.self_ref, t]));
@@ -133,8 +131,6 @@ const JsonViewer = ({
             ref={(el) => {
               jsonRefs.current[item.self_ref] = el;
             }}
-            onMouseEnter={() => onHover(item.self_ref)}
-            onMouseLeave={() => onHover(null)}
             onClick={() => onClick(item.self_ref)}
             className={`border p-2 rounded cursor-pointer overflow-auto ${
               clickedId === item.self_ref
