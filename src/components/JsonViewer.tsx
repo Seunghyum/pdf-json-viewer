@@ -1,4 +1,4 @@
-import { type JSX } from "react";
+import { useMemo, type JSX } from "react";
 import type { Report, Table } from "../@types/pdfJson";
 import useScrollTo from "../hooks/useScrollTo";
 
@@ -17,8 +17,13 @@ const JsonViewer = ({
 }: JsonViewerProps) => {
   const jsonRefs = useScrollTo(hoveredId);
 
-  const textMap = Object.fromEntries(data.texts.map((t) => [t.self_ref, t]));
-  const tableMap = Object.fromEntries(data.tables.map((t) => [t.self_ref, t]));
+  const maps = useMemo(
+    () => ({
+      textMap: Object.fromEntries(data.texts.map((t) => [t.self_ref, t])),
+      tableMap: Object.fromEntries(data.tables.map((t) => [t.self_ref, t])),
+    }),
+    [data]
+  );
 
   const renderTable = (item: Table) => {
     const occupied = new Set(); // 실제 렌더링 위치 추적
@@ -100,20 +105,20 @@ const JsonViewer = ({
           renderTarget = (
             <pre>
               {data.groups[idx].children
-                .map((c) => textMap[c.$ref].text)
+                .map((c) => maps.textMap[c.$ref].text)
                 .join("\n")}
             </pre>
           );
-          item = textMap[data.groups[idx].children[0].$ref];
+          item = maps.textMap[data.groups[idx].children[0].$ref];
         } else if (id.startsWith("#/pictures/")) {
           const idx = parseInt(id.replace("#/pictures/", ""), 10);
           item = data.pictures[idx];
           renderTarget = <img src={item.image?.uri} />;
         } else if (id.startsWith("#/tables/")) {
-          item = tableMap[id];
+          item = maps.tableMap[id];
           renderTarget = renderTable(item);
         } else {
-          item = textMap[id];
+          item = maps.textMap[id];
           if (item.label === "page_header") {
             renderTarget = <h1 className="text-2xl font-bold">{item.text}</h1>;
           } else if (item.label === "section_header") {
