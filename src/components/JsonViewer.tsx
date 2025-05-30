@@ -72,9 +72,13 @@ const JsonViewer = ({
         let renderTarget: JSX.Element | string;
         if (id.startsWith("#/groups/")) {
           const idx = parseInt(id.replace("#/groups/", ""), 10);
-          renderTarget = data.groups[idx].children
-            .map((c) => textMap[c.$ref].text)
-            .join("\n");
+          renderTarget = (
+            <pre>
+              {data.groups[idx].children
+                .map((c) => textMap[c.$ref].text)
+                .join("\n")}
+            </pre>
+          );
           item = textMap[data.groups[idx].children[0].$ref];
         } else if (id.startsWith("#/pictures/")) {
           const idx = parseInt(id.replace("#/pictures/", ""), 10);
@@ -85,7 +89,15 @@ const JsonViewer = ({
           renderTarget = renderTable(item);
         } else {
           item = textMap[id];
-          renderTarget = item.text;
+          if (item.label === "page_header") {
+            renderTarget = <h1 className="text-2xl font-bold">{item.text}</h1>;
+          } else if (item.label === "section_header") {
+            renderTarget = <h4 className="text-xl font-bold">{item.text}</h4>;
+          } else if (item.label === "text") {
+            renderTarget = <p className="text-xs">{item.text}</p>;
+          } else {
+            renderTarget = item.text;
+          }
         }
 
         return (
@@ -97,7 +109,7 @@ const JsonViewer = ({
             onMouseEnter={() => onHover(item.self_ref)}
             onMouseLeave={() => onHover(null)}
             onClick={() => onClick(item.self_ref)}
-            className={`border p-2 rounded overflow-auto ${
+            className={`border p-2 rounded cursor-pointer overflow-auto ${
               clickedId === item.self_ref
                 ? "bg-yellow-200"
                 : hoveredId === item.self_ref
